@@ -24,7 +24,7 @@ public class CPHInline
         }
         //-Get. the- results-
         Dictionary<string,object> clipInfo = getClipInfo.Result;
-
+		CPH.SetArgument("clipFound",true);
         //-Set. Arguments- accordingly-
         CPH.SetArgument("clipId",clipId);
         CPH.SetArgument("clipTitle",clipInfo["title"]);
