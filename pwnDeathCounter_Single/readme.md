@@ -7,7 +7,7 @@ If you already installed my previous death counter (version 1.4.0), your old dea
 
 ## Import File
 
-[Leaderboard_Get_Top_X_by_pwnyy.sb](../%5Bpwn%5D_DeathCounter_Single_1.6.0_by_pwnyy.sb.sb)
+[Leaderboard_Get_Top_X_by_pwnyy.sb](../[pwn]_DeathCounter_Single_1.6.0_by_pwnyy.sb)
 
 
 ## Installation
