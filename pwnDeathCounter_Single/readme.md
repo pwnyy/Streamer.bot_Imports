@@ -1,7 +1,7 @@
 ## Description
 The Death Counter lets you track deaths for specific games during your stream. Simply set the game as a death counter, and then you or your moderators can manually update the counter. It syncs with your current Twitch category and adjusts when you switch games. You can also trigger actions when the counter changes or when you set/remove a category as death counter. The commands also work on YouTube and Trovo, always referencing your Twitch category.
 
-## Version 1.6.0 of this death counter requires Streamer.bot version 0.2.4. If you are not at least on that version I can't guarantee that it's working correctly.
+⚠**Version 1.6.0 of this death counter requires Streamer.bot version 0.2.4. If you are not at least on that version I can't guarantee that it's working correctly.**⚠
 
 If you already installed my previous death counter (version 1.4.0), your old death counters will automatically be converted to the new one after importing and executing any of the new actions. If there are any counters left you can check the pwnedCounter_Games global variable and do a manual conversion again which is described later.
 
