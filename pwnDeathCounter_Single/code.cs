@@ -174,39 +174,38 @@ public class CPHInline
 		CheckNullGameCounters();
 		Remove7TVWhiteSpace();
 		string gameId = _currentGame["gameId"];
-		int messageType = 0;
+		int messageTypeResult = 0;
 		CPH.TryGetArg(_inputVariable,out string rawInput);
 		CPH.TryGetArg("useInput",out bool useInput);
 		int inputNum = 1;
-
+		_pdcsMessageType = "increaseDeathCounter";
 		if(_dcDict.ContainsKey(gameId))
 		{	 		
 			if(useInput && !string.IsNullOrEmpty(rawInput) && int.TryParse(rawInput,out inputNum) && inputNum <= int.MaxValue)
 			{		 
-				messageType = 1;
+				messageTypeResult = 1;
 				inputNum = Math.Abs(inputNum);
 				_dcDict[gameId].Count += inputNum;
 				_dcInfo.TotalDeaths += inputNum;
 			}else if(!useInput || string.IsNullOrEmpty(rawInput)){
-				messageType = 1;
+				messageTypeResult = 1;
 				_dcDict[gameId].Count++;
 				_dcInfo.TotalDeaths++;
 			}else{		 		
 				//Value not correct
-				messageType = -1;
+				messageTypeResult = -1;
 			}
 		}
 		
 		AddCurrentGameArgs();
-		if(messageType > 0)
+		if(messageTypeResult > 0)
 		{		 		
 			SaveGameCounters();
-			TriggerOnChange();
+			TriggerOnChange(_pdcsMessageType);
 		}
-		CPH.SetArgument("pdcsMessageType","increaseDeathCount");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
-		_pdcsMessageType = "increaseDeathCount";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -216,8 +215,8 @@ public class CPHInline
 		CheckNullGameCounters();
 		Remove7TVWhiteSpace();
 		string gameId = _currentGame["gameId"];
-		
-		int messageType = 0;
+		_pdcsMessageType = "decreaseDeathCounter";
+		int messageTypeResult = 0;
 		CPH.TryGetArg(_inputVariable,out string rawInput);
 		CPH.TryGetArg("useInput",out bool useInput);
 		int inputNum = 0;
@@ -226,16 +225,16 @@ public class CPHInline
 			long oldGameCount = _dcDict[gameId].Count;
 			if(useInput && !string.IsNullOrEmpty(rawInput) && int.TryParse(rawInput,out inputNum)  && inputNum <= int.MaxValue)
 			{		 
-				messageType = 1;
+				messageTypeResult = 1;
 				inputNum = Math.Abs(inputNum);
 				_dcDict[gameId].Count = (_dcDict[gameId].Count - inputNum) >= 0 ? _dcDict[gameId].Count - inputNum : 0;
 			}else if(!useInput || string.IsNullOrEmpty(rawInput)){
-				messageType = 1;
+				messageTypeResult = 1;
 				if(_dcDict[gameId].Count > 0)_dcDict[gameId].Count--;
 				if(_dcInfo.TotalDeaths > 0)_dcInfo.TotalDeaths--;
 			}else{		 		
 				//Value not correct
-				messageType = -1;
+				messageTypeResult = -1;
 			}
 			if(oldGameCount != _dcDict[gameId].Count)
 			{		 		
@@ -243,15 +242,14 @@ public class CPHInline
 			}
 		}
 		AddCurrentGameArgs();
-		if(messageType > 0)
+		if(messageTypeResult > 0)
 		{
 			SaveGameCounters();
-			TriggerOnChange();
+			TriggerOnChange(_pdcsMessageType);
 		}
-		CPH.SetArgument("pdcsMessageType","decreaseDeathCount");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
-		_pdcsMessageType = "decreaseDeathCount";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -261,32 +259,31 @@ public class CPHInline
 		CheckNullGameCounters();
 		Remove7TVWhiteSpace();
 		string gameId = _currentGame["gameId"];
-		
-		int messageType = 0;
+		_pdcsMessageType = "setDeathCounter";
+		int messageTypeResult = 0;
 		CPH.TryGetArg(_inputVariable,out string rawInput);
 		int inputNum = 0;
 		if(_dcDict.ContainsKey(gameId))
 		{	 		
 			if(!string.IsNullOrEmpty(rawInput) && int.TryParse(rawInput,out inputNum) && inputNum >= 0)
 			{		 
-				messageType = 1;
+				messageTypeResult = 1;
 				_dcInfo.TotalDeaths -= _dcDict[gameId].Count;
 				_dcDict[gameId].Count = inputNum;
 				_dcInfo.TotalDeaths += inputNum;
 			}else{		 		
-				messageType = -1;
+				messageTypeResult = -1;
 			}
 		}
 		AddCurrentGameArgs();
-		if(messageType > 0)
+		if(messageTypeResult > 0)
 		{		 		
 			SaveGameCounters();
-			TriggerOnChange();
+			TriggerOnChange(_pdcsMessageType);
 		}
-		CPH.SetArgument("pdcsMessageType","setDeathCount");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
-		_pdcsMessageType = "setDeathCount";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -294,17 +291,17 @@ public class CPHInline
 	public bool GetGameCounter()
 	{	 		 
 		CheckNullGameCounters();
-		int messageType = 0;
+		int messageTypeResult = 0;
 		string gameId = _currentGame["gameId"];
 		if(_dcDict.ContainsKey(gameId))
 		{	 		
-			messageType = 1;
+			messageTypeResult = 1;
 		}		 
 		AddCurrentGameArgs();
-		CPH.SetArgument("pdcsMessageType","getGameCounter");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
 		_pdcsMessageType = "getGameCounter";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -312,17 +309,17 @@ public class CPHInline
 	public bool GetTotalDeaths()
 	{	 		 
 		CheckNullGameCounters();
-		int messageType = 0;
+		int messageTypeResult = 0;
 		string gameId = _currentGame["gameId"];
 		if(_dcDict.ContainsKey(gameId))
 		{	 		
-			messageType = 1;
+			messageTypeResult = 1;
 		}		 
 		AddCurrentGameArgs();
-		CPH.SetArgument("pdcsMessageType","getTotalDeaths");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
 		_pdcsMessageType = "getTotalDeaths";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -330,10 +327,11 @@ public class CPHInline
 	public bool AddGameToCounter()
 	{	 		 
 		CheckNullGameCounters();
-		int messageType = 0;
+		int messageTypeResult = 0;
+		_pdcsMessageType = "addDeathCounter";
 		if(!_dcDict.ContainsKey(_currentGame["gameId"]))
 		{	 		
-			messageType = 1;
+			messageTypeResult = 1;
 			GameDeathInfo info = new GameDeathInfo()
 			{		 
 				GameName = _currentGame["gameName"],
@@ -342,13 +340,12 @@ public class CPHInline
 			};
 			_dcDict.Add(_currentGame["gameId"],info);
 			SaveGameCounters();
-			TriggerOnChange();
+			TriggerOnChange(_pdcsMessageType);
 		}
 		AddCurrentGameArgs();
-		CPH.SetArgument("pdcsMessageType","addDeathCounter");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
-		_pdcsMessageType = "addDeathCounter";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -356,21 +353,21 @@ public class CPHInline
 	public bool RemoveGameFromCounter()
 	{	 		 
 		CheckNullGameCounters();
-		int messageType = 0;
+		int messageTypeResult = 0;
 		AddCurrentGameArgs();
+		_pdcsMessageType = "removeDeathCounter";
 		if(_dcDict.ContainsKey(_currentGame["gameId"]))
 		{	 		
-			messageType = 1;
+			messageTypeResult = 1;
 			CPH.LogDebug($"[pwn DeathCounter Single] - "+JsonConvert.SerializeObject(_dcInfo,Formatting.None));
 			_dcInfo.TotalDeaths -= _dcDict[_currentGame["gameId"]].Count;
 			_dcDict.Remove(_currentGame["gameId"]);
 			SaveGameCounters();
-			TriggerOnChange();
+			TriggerOnChange(_pdcsMessageType);
 		}		 
-		CPH.SetArgument("pdcsMessageType","removeDeathCounter");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
-		_pdcsMessageType = "removeDeathCounter";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -378,7 +375,7 @@ public class CPHInline
 	public bool GetLeaderboard()
 	{		 		 
 		Remove7TVWhiteSpace();
-		int messageType = 0;
+		int messageTypeResult = 0;
 		CPH.TryGetArg(_inputVariable,out string rawInput);
 		CPH.TryGetArg("ignoreInput",out bool ignoreInput);
 		long minBoard = CPH.TryGetArg("minBoardSize",out minBoard) ? minBoard >= 1 ? minBoard : 1 : 1;
@@ -390,7 +387,7 @@ public class CPHInline
 		bool validInput = !hasInput || (hasInput && long.TryParse(rawInput,out boardSize) && boardSize <= int.MaxValue && boardSize >= minBoard && boardSize <= maxBoard);
 		if((hasInput && validInput) || !hasInput && _dcDict.Count > 0)
 		{	 		
-			messageType = 1;
+			messageTypeResult = 1;
 			Dictionary<string,GameDeathInfo> lbRatings = new Dictionary<string,GameDeathInfo>();
 			Dictionary<string,Dictionary<string,object>> SingleLb = new Dictionary<string,Dictionary<string,object>>();
 				
@@ -451,14 +448,14 @@ public class CPHInline
 			args["pdcsLeaderboardFile"] = joinedFileString;
 		}else if(!validInput)
 		{		 		
-			messageType = -1;
+			messageTypeResult = -1;
 		}
 		AddCurrentGameArgs();
-		CPH.SetArgument("pdcsMessageType","getLeaderboard");
-		CPH.SetArgument("pdcsMessageTypeResult",messageType);
-		args["pdcsTotalDeaths"] = _dcInfo.TotalDeaths;
 		_pdcsMessageType = "getLeaderboard";
-		_pdcsMessageTypeResult = messageType;
+		_pdcsMessageTypeResult = messageTypeResult;
+		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
+		CPH.SetArgument("pdcsMessageTypeResult",messageTypeResult);
+		args["pdcsTotalDeaths"] = _dcInfo.TotalDeaths;
 		SendDeathCounterMessage();
 		return true;
 	}
@@ -648,10 +645,11 @@ public class CPHInline
 		}
 	}
 	
-	public void TriggerOnChange()
+	public void TriggerOnChange(string changeType)
 	{	 		 
 		string gameId = _currentGame["gameId"];
 		Dictionary<string,object> triggerArgs = new Dictionary<string,object>();
+		triggerArgs["pdcsChangeType"] = changeType;
 		triggerArgs["pdcsGameId"] = gameId;
 		triggerArgs["pdcsGame"] = _currentGame["gameName"];
 		triggerArgs["pdcsGameBoxArtUrl"] = String.IsNullOrEmpty(_currentGame["gameBoxArt"]) ? _blankGameBoxArt : _currentGame["gameBoxArt"].Replace("{width}x{height}",_artDimension);
@@ -674,7 +672,7 @@ public class CPHInline
 		string message = "";
 		switch(_pdcsMessageType)
 		{	 		
-			case "increaseDeathCount":
+			case "increaseDeathCounter":
 				switch(_pdcsMessageTypeResult)
 				{		 
 					case -1:
@@ -688,7 +686,7 @@ public class CPHInline
 						break;
 				}
 				break;
-			case "decreaseDeathCount":
+			case "decreaseDeathCounter":
 				switch(_pdcsMessageTypeResult)
 				{		 		
 					case -1:
@@ -702,7 +700,7 @@ public class CPHInline
 						break;
 				}
 				break;
-			case "setDeathCount":
+			case "setDeathCounter":
 				switch(_pdcsMessageTypeResult)
 				{		 		
 					case -1:
