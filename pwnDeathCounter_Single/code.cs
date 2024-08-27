@@ -137,6 +137,7 @@ public class CPHInline
 	
 	public void Dispose()
 	{	 		 
+		SaveGameCounters();
 		string json = JsonConvert.SerializeObject(_dcInfo,Formatting.None);
 		CPH.LogDebug($"[pwn DeathCounter Single][{versionNum}] Log on Dispose: "+json);
 		_client?.Dispose();
@@ -578,6 +579,7 @@ public class CPHInline
 			}
 		}
 		if(!_dcInfo.InitFetchOldCounters) _dcInfo.InitFetchOldCounters = true;
+		SaveGameCounters();
 	}
 	
 	public void SaveGameCounters()
