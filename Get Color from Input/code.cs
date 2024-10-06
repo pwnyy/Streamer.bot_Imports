@@ -9,7 +9,7 @@ public class CPHInline
 	{	 		
 		
 		CPH.TryGetArg("inputColor",out string inputColor);
-		Dictionary<string,string> inputs = BreakUpInput(inputColor);
+		Dictionary<string,string> inputs = BreakUpInput(inputColor.ToLower());
 		
 		Color foundColor = Color.Empty;
 		KnownColor knownC;
@@ -27,7 +27,7 @@ public class CPHInline
 		bool found = false;
 		if(inputs.Count > 0)
 		{		 
-			switch(inputs["input0"].ToLower())
+			switch(inputs["input0"])
 			{		 		
 				case "hex":
 					bool x = inputs.TryGetValue("input1",out hexString);
