@@ -1,3 +1,4 @@
+## Get Color from Input
 Use the input from anywhere check whether the html color name, hex value, rgb value or argb is found or and get the needed ARGB, HEX or OBS color values. 
 Extension includes "!color" command itself as quick example, can quickly be altered with a reward redemption trigger with input, or other ways just needing to adjust the inputColor argument value to get the input.
 
