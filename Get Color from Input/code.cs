@@ -60,7 +60,30 @@ public class CPHInline
 					{
 						nameInput += word.Value;
 					}
-					
+					switch(nameInput)
+					{
+						case "darkgrey":
+							nameInput = "darkgray";
+							break;
+						case "darkslategrey":
+							nameInput = "darkslategray";
+							break;
+						case "dimgrey":
+							nameInput = "dimgray";
+							break;
+						case "grey":
+							nameInput = "gray";
+							break;
+						case "lightgrey":
+							nameInput = "lightgray";
+							break;
+						case "lightslategrey":
+							nameInput = "lightslategray";
+							break;
+						case "slategrey":
+							nameInput = "slategray";
+							break;
+					}
 					found = Enum.TryParse(nameInput,true, out knownC);
 					foundColor = found ? Color.FromKnownColor(knownC): Color.Empty;
 					break;
