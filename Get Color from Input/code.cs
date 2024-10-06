@@ -1,10 +1,12 @@
+// Author: pwnyy , https://twitch.tv/pwnyytv , https://x.com/pwnyy, https://ko-fi.com/pwnyy, https://pwnyy.tv
+// Contact: contact@pwnyy.tv , or on the above mentioned social media.
 using System;
 using System.Drawing;
 using System.Collections.Generic;
 public class CPHInline
-{
+{	 		 
 	public bool Execute()
-	{
+	{	 		
 		
 		CPH.TryGetArg("inputColor",out string inputColor);
 		Dictionary<string,string> inputs = BreakUpInput(inputColor);
@@ -24,9 +26,9 @@ public class CPHInline
 		
 		bool found = false;
 		if(inputs.Count > 0)
-		{
+		{		 
 			switch(inputs["input0"].ToLower())
-			{
+			{		 		
 				case "hex":
 					bool x = inputs.TryGetValue("input1",out hexString);
 					if(inputs["input1"][0] != '#') hexString = "#" + hexString;
@@ -57,11 +59,11 @@ public class CPHInline
 				default:
 					string nameInput = "";
 					foreach(KeyValuePair<string,string> word in inputs)
-					{
+					{		 		
 						nameInput += word.Value;
-					}
+					}	 		 
 					switch(nameInput)
-					{
+					{	 		
 						case "darkgrey":
 							nameInput = "darkgray";
 							break;
@@ -93,7 +95,7 @@ public class CPHInline
 		found = foundColor != Color.Empty;
 		CPH.SetArgument("foundColor",found);
 		if(found)
-		{
+		{		 
 			
 			int alpha = foundColor.A;
 			int red = foundColor.R;
@@ -120,7 +122,7 @@ public class CPHInline
 	}
 	
 	public void Remove7TVWhiteSpace()
-	{	 		 
+	{		 		
 		Dictionary<string,object> tempArg = new Dictionary<string,object>(args);
 		foreach(KeyValuePair<string,object> arg in tempArg)
 		{	 		
@@ -135,15 +137,15 @@ public class CPHInline
 	}
 	
 	public Dictionary<string,string> BreakUpInput(string input)
-	{	
+	{		 		
 		Dictionary<string,string> output = new Dictionary<string,string>();
 		if(!String.IsNullOrEmpty(input))
-		{
+		{	 		 
 			string[] wordArray = input.Split(' ');	
 			for(int i = 0;i<wordArray.Length;i++)
-			{
+			{	 		
 				output.Add("input"+i,wordArray[i]);
-			}
+			}		 
 		}
 		return output;
 	}
