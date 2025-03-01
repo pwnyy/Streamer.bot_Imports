@@ -20,7 +20,6 @@ public class CPHInline
 {
 	public bool Execute()
 	{
-        CPH.SendMessage(CPH.GetVersion());
 		CPH.TryGetArg("userType",out string platform);
 		platform = platform.ToLower();
 		CPH.TryGetArg("messageType",out int messageType);
