@@ -22,6 +22,8 @@ public class CPHInline
 	public bool persisted = true;
 	public string broadcaster;
 	public string broadcastUserId;
+	public string ytBroadcaster;
+	public string ytBroadcastUserId;
 	public Dictionary<string,HashSet<string>> ignoredGroups;
 	public string[] secondsLang;
 	public string[] minutesLang;
@@ -33,18 +35,19 @@ public class CPHInline
     public bool Execute()
     {	
     	RemoveInvisChar7TV();
-    	CPH.TryGetArg("userVariable",out string userVar);
+    	CPH.TryGetArg("userVarOrRewardId",out string userVarId);
+    	CPH.TryGetArg("isRewardId",out bool isReward);
     	CPH.TryGetArg("defaultTop",out long defaultTop);
-        CPH.TryGetArg("isPersistedVariable",out persisted);
+        CPH.TryGetArg("isPersisted",out persisted);
         
         CPH.TryGetArg("userId",out string userId);
         CPH.TryGetArg("user",out string user);
 		CPH.TryGetArg("userName",out string userName);
         string platform = CPH.TryGetArg("userType", out platform) ? platform.ToLower() : "twitch";
         
-        CPH.TryGetArg("broadcastUserId",out broadcastUserId);
-        CPH.TryGetArg("broadcastUserName", out string broadcastUserName);
-        CPH.TryGetArg(platform == "youtube" ? "broadcastUserName" : "broadcastUser", out broadcaster);
+		CPH.TryGetArg("trBroadcastUserId",out string trBroadcastUserId);
+		TwitchUserInfo twBroadcaster = CPH.TwitchGetBroadcaster();
+		YouTubeUserInfo ytBroadcaster = CPH.YouTubeGetBroadcaster();
         
         bool broadcasterUsage = Convert.ToBoolean(args["broadcasterUsage"]);
         if (userId == broadcastUserId && !broadcasterUsage)return false;
@@ -81,7 +84,8 @@ public class CPHInline
 		GetIgnoredGroups();
 		
         CPH.TryGetArg("includeBroadcasterLeaderboard",out bool includeBroadcaster);
-		List<UserValue> userIdsWithVariable = GetUserList(userVar, platform, includeBroadcaster);
+		CPH.TryGetArg("useAllPlatforms",out bool allPlatforms);
+		List<UserValue> userIdsWithVariable = GetUserList(userVarId, isReward, platform, includeBroadcaster, allPlatforms);
 		
 		CPH.TryGetArg("orderByDescending", out bool orderByDes);
 		userIdsWithVariable = orderByDes ? userIdsWithVariable.OrderByDescending(u => u.Value).ToList() : userIdsWithVariable.OrderBy(u => u.Value).ToList();
@@ -109,6 +113,7 @@ public class CPHInline
 			CPH.SetArgument("lbRedeemerId",userId);
 			CPH.SetArgument("lbRedeemer",user);
 			CPH.SetArgument("lbRedeemerLogin",userName);
+			CPH.SetArgument("lbRedeemerType",platform);
 			CPH.SetArgument("lbRedeemerRank",redeemerIndex == -1 ? userIdsWithVariable.Count()+1 : redeemerIndex +1);
 			if(redeemerIndex > -1)
 			{
@@ -130,7 +135,7 @@ public class CPHInline
 		}
 		CPH.TryGetArg("rankFormat",out string rankFormat);
 		
-		Dictionary<string,(string,string,string)> outputDict = new Dictionary<string,(string,string,string)>();
+		Dictionary<string,(string,string,string,string)> outputDict = new Dictionary<string,(string,string,string,string)>();
 		int i = 1;
 		foreach(UserValue rank in topRanks)
 		{
@@ -138,14 +143,16 @@ public class CPHInline
 			
 			singleRank = singleRank.Replace("%rankUser%",rank.User);
 			string value = isTime ? SecToTime((long)Math.Floor(rank.Value / divider), showSeconds,shortF) : (rank.Value / divider).ToString(vFormat);
-			singleRank = singleRank.Replace("%rankValue%",value); 
+			singleRank = singleRank.Replace("%rankValue%",value);
+			singleRank = singleRank.Replace("%rankType%",ShortenPlatform(rank.UserType));
 			rankingList.Add(singleRank);
 			CPH.SetArgument("lbUserRank"+i,i);
 			CPH.SetArgument("lbUser"+i,rank.User);
 			CPH.SetArgument("lbUserLogin"+i,rank.UserLogin);
 			CPH.SetArgument("lbUserId"+i,rank.UserId);
 			CPH.SetArgument("lbUserValue"+i,value);
-			outputDict.Add(rank.UserId,(rank.User,rank.UserLogin,value));
+			CPH.SetArgument("lbUserType"+i,rank.UserType);
+			outputDict.Add(rank.UserId,(rank.User,rank.UserLogin,value,rank.UserType));
 			i++;
 		}
 		
@@ -161,38 +168,59 @@ public class CPHInline
         return true;
     }
 
-    public List<UserValue> GetUserList(string varName, string platform, bool includeBroadcaster)
+    public List<UserValue> GetUserList(string userVarId, bool isReward, string platform, bool includeBroadcaster, bool allPlatforms)
     {
+    	platform = isReward && platform != "twitch" ? "twitch" : platform;
+		if(allPlatforms) platform = "all";
 		List<UserVariableValue<string>> objectList = new List<UserVariableValue<string>>();
 		switch(platform)
 		{
 			case "twitch":
-				objectList = CPH.GetTwitchUsersVar<string>(varName, persisted);
+				if(isReward)
+				{
+					List<TwitchRewardCounter> rewardCounters = CPH.TwitchGetRewardUserCounters(userVarId, persisted);
+					objectList = rewardCounters
+						.Select(counter => new UserVariableValue<string>
+						{
+							UserId = counter.UserId,
+							UserName = counter.UserName,
+							UserLogin = counter.UserLogin,
+							Value = counter.Count.ToString(),
+							UserType = "twitch"
+						})
+						.ToList();
+					
+				}else{
+					objectList = CPH.GetTwitchUsersVar<string>(userVarId, persisted);
+				}
+				
 				break;
 			case "youtube":
-				objectList = CPH.GetYouTubeUsersVar<string>(varName, persisted);
+				objectList = CPH.GetYouTubeUsersVar<string>(userVarId, persisted);
 				break;
 			case "trovo":
-				objectList = CPH.GetTrovoUsersVar<string>(varName, persisted);
+				objectList = CPH.GetTrovoUsersVar<string>(userVarId, persisted);
+				break;
+			case "all":
+				objectList.AddRange(CPH.GetTwitchUsersVar<string>(userVarId, persisted));
+				objectList.AddRange(CPH.GetYouTubeUsersVar<string>(userVarId, persisted));
+				objectList.AddRange(CPH.GetTrovoUsersVar<string>(userVarId, persisted));
 				break;
 		}
-		
 		List<UserValue> resultList = new List<UserValue>();		 		 
-		
 		foreach(UserVariableValue<string> uvv in objectList)	 		
 		{		 
-			
 			decimal parsed = 0;		 		
 			bool check = uvv.Value != null && decimal.TryParse(uvv.Value.ToString(),out parsed) ? true : false;		 		
 			if(!check)
 			{
 				string valueString = uvv.Value == null ? "null" : uvv.Value;
-				CPH.LogError($"[pwn LeaderBoard TopX] Could not parse to number, please fix: Varname: {varName} - Value: {valueString} Platform: {platform} - User: {uvv.UserName} / {uvv.UserLogin}({uvv.UserId})");
+				CPH.LogError($"[pwn LeaderBoard TopX] Could not parse to number, please fix: Varname: {userVarId} - Value: {valueString} Platform: {uvv.UserType} - User: {uvv.UserName} / {uvv.UserLogin}({uvv.UserId})");
 			}
-
-			if (!ignoredGroups[platform].Contains(uvv.UserId) && (includeBroadcaster || uvv.UserId != broadcastUserId))		 		 
+			
+			if (!ignoredGroups[uvv.UserType].Contains(uvv.UserId) && (includeBroadcaster || uvv.UserId != broadcastUserId))		 		 
 			{		 		
-				resultList.Add(new UserValue(){User=uvv.UserName, UserLogin = uvv.UserLogin, UserId = uvv.UserId, Value = parsed});		 
+				resultList.Add(new UserValue(){User=uvv.UserName, UserLogin = uvv.UserLogin, UserId = uvv.UserId, UserType = uvv.UserType, Value = parsed});		 
 			}		 		
 		}		 		
 		return resultList;
@@ -205,6 +233,7 @@ public class CPHInline
 			{"twitch",new HashSet<string>()},
 			{"youtube",new HashSet<string>()},
 			{"trovo",new HashSet<string>()}
+			
     	};	 		
 		
     	if(methodGroups != null)		 
@@ -282,6 +311,24 @@ public class CPHInline
 		return joinedStr;
     }
     
+    public string ShortenPlatform(string platform)
+    {
+    	string result = platform;
+		switch(platform)
+		{
+			case "twitch":
+				result = "TW";
+				break;
+			case "youtube":
+				result = "YT";
+				break;
+			case "trovo":
+				result = "TR";
+				break;
+		}
+		return result;
+    }
+    
     public void RemoveInvisChar7TV()
 	{
 		if(CPH.TryGetArg("rawInput",out string rawInput) && rawInput.IndexOf("󠀀") != -1)
@@ -306,7 +353,8 @@ public class UserValue
 {	 		
 	public string User{get;set;}
 	public string UserLogin{get;set;}
-	public string UserId{get;set;}		  		
+	public string UserId{get;set;}
+	public string UserType{get;set;}		  		
 	public decimal Value{get;set;}
 	public string FormattedValue{get;set;}		 			
 }		 		
