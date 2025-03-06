@@ -87,7 +87,7 @@ public void SendPlatformMessage(string platform, string messageOutput)
 
             if (broadcastId != null)
             {
-                SendYouTubeVersionMessage(messageOutput, botSend, broadcastId);
+               CPH.SendYouTubeMessage(messageOutput, botSend, broadcastId: broadcastId);
             }
             else
             {
@@ -100,41 +100,4 @@ public void SendPlatformMessage(string platform, string messageOutput)
             break;
     }
 }
-private void SendYouTubeVersionMessage(string message, bool botSend, string broadcastId)
-    {
-        Type cphType = CPH.GetType();
-        MethodInfo sendMethod;
-
-        if (IsVersionOrNewer(CPH.GetVersion(), "1.0.0"))
-        {
-            sendMethod = cphType.GetMethod("SendYouTubeMessage",
-                new Type[] { typeof(string), typeof(bool), typeof(bool), typeof(string) });
-
-            if (sendMethod != null)
-            {
-                sendMethod.Invoke(CPH, new object[] { message, botSend, true, broadcastId });
-                return;
-            }
-        }
-        else
-        {
-            sendMethod = cphType.GetMethod("SendYouTubeMessage",
-                new Type[] { typeof(string), typeof(bool), typeof(string) });
-
-            if (sendMethod != null)
-            {
-                sendMethod.Invoke(CPH, new object[] { message, botSend, broadcastId });
-                return;
-            }
-        }
-
-        CPH.LogError("[pwn LeaderBoard TopX] Message - SendYouTubeMessage method not found for this version!");
-    }
-
-    public bool IsVersionOrNewer(string currentVersion, string targetVersion)
-    {
-        Version current = new Version(currentVersion);
-        Version target = new Version(targetVersion);
-        return current >= target;
-    }
 }
