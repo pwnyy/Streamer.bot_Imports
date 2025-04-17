@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 public class CPHInline
-{
+{	 		 
 	public bool Execute()
-	{
+	{	 		
 		CPH.TryGetArg("giveawayId",out string id);
 		string varName = "pwnTwitchMultiTicketGiveaway_"+id;
 		
@@ -11,13 +11,13 @@ public class CPHInline
 		CPH.SetArgument("winnerFound",usersVarList.Count > 0);
 		
 		if(usersVarList.Count > 0)
-		{
+		{		 
 			List<UserVariableValue<long>> pullSet = new List<UserVariableValue<long>>();
 			
 			foreach(UserVariableValue<long> user in usersVarList)
-			{
+			{		 		
 				for(int i = 0;i<user.Value;i++)
-				{
+				{		 		
 					pullSet.Add(user);
 				}
 			}
@@ -37,7 +37,7 @@ public class CPHInline
 
 			CPH.TryGetArg("removeWinner",out bool removeWinner);
 			if(removeWinner)
-			{
+			{	 		 
 				CPH.UnsetTwitchUserVarById(winnerInfo.UserId, varName, true);
 			}
 		}
