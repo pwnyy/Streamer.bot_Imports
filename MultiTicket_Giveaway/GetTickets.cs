@@ -1,9 +1,9 @@
 using System;
 
 public class CPHInline
-{
+{	 		 
     public bool Execute()
-    {
+    {	 		
         CPH.TryGetArg("giveawayId", out string id);
         CPH.TryGetArg("ticketCost", out long ticketCost);
         CPH.TryGetArg("maxUserTickets", out long maxTickets);
@@ -21,7 +21,7 @@ public class CPHInline
         // Get user's value
         string valueString = CPH.GetTwitchUserVarById<string>(userId, varName, true) ?? "0";
         if (!long.TryParse(valueString, out long userValue))
-        {
+        {		 
             LogError($"Error in user variable for {user}({userId}): {varName}", valueString);
             return true;
         }
@@ -30,7 +30,7 @@ public class CPHInline
         string userTicketVar = $"pwnTwitchMultiTicketGiveaway_{id}";
         string currentTicketsString = CPH.GetTwitchUserVarById<string>(userId, userTicketVar, true) ?? "0";
         if (!long.TryParse(currentTicketsString, out long currentTickets))
-        {
+        {		 		
             LogError($"Error in user variable for {user}({userId}): {userTicketVar}", currentTicketsString);
             return true;
         }
@@ -52,22 +52,22 @@ public class CPHInline
         bool validAmount = maxTickets <= 0 || newTicketAmount <= maxTickets;
 
         if (tryGetTicket && validAmount)
-        {
+        {		 		
             long totalCost = ticketAmount * ticketCost;
             if (totalCost <= userValue)
-            {
+            {	 		 
                 // Update user variables
                 CPH.SetTwitchUserVarById(userId, userTicketVar, newTicketAmount, true);
                 CPH.SetTwitchUserVarById(userId, varName, userValue - totalCost, true);
                 SetResult(1, ticketAmount, totalCost, newTicketAmount, userValue);
             }
             else
-            {
+            {	 		
                 SetResult(0, ticketAmount, totalCost, currentTickets, userValue);
             }
         }
         else
-        {
+        {		 
             SetResult(validAmount ? -2 : -1, ticketAmount, ticketAmount * ticketCost, currentTickets, userValue);
         }
 
@@ -75,13 +75,13 @@ public class CPHInline
     }
 
     private void LogError(string message, string currentValue)
-    {
+    {		 		
         CPH.LogError($"[pwn Twitch MultiTicketGiveaway] {message}. Current value is \"{currentValue}\".");
         CPH.SetArgument("messageType", -3);
     }
 
     private void SetResult(int result, long ticketAmount, long totalCost, long totalTickets, long currentUserValue)
-    {
+    {		 		
         CPH.SetArgument("messageType", result);
         CPH.SetArgument("boughtTickets", ticketAmount);
         CPH.SetArgument("totalCost", totalCost);
