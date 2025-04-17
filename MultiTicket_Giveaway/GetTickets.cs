@@ -11,11 +11,12 @@ public class CPHInline
         CPH.TryGetArg("userVarUsed", out string varName);
         CPH.TryGetArg("user", out string user);
         CPH.TryGetArg("userId", out string userId);
+        CPH.TryGetArg("ignoreInput",out bool ignoreInput);
         CPH.TryGetArg("rawInput", out string input);
 		
-		    //Disabling use of other platforms than Twitch (multiplatform comes later)
-		    CPH.TryGetArg("userType",out string platform);
-		    if(platform.ToLower() != "twitch") return false;
+		//Disabling use of other platforms than Twitch (multiplatform comes later)
+		CPH.TryGetArg("userType",out string platform);
+		if(platform.ToLower() != "twitch") return false;
 		
         // Get user's value
         string valueString = CPH.GetTwitchUserVarById<string>(userId, varName, true) ?? "0";
@@ -41,6 +42,8 @@ public class CPHInline
         bool isValidInput = String.IsNullOrEmpty(input) || long.TryParse(input,out ticketAmountInput);
         
         ticketAmount = isValidInput && !String.IsNullOrEmpty(input) ? ticketAmountInput : ticketAmount;
+        
+        ticketAmount = ignoreInput ? 1 : ticketAmount;
         
         bool tryGetTicket = isValidInput || nvIsTicket;
 
