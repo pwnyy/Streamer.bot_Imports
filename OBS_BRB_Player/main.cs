@@ -41,6 +41,7 @@ public class CPHInline
 	string currentMedia = "";
 	string currentFolder = "";
 	bool restartFromLastMedia = false;
+	bool playRandom = false;
 	 
 	Dictionary<string,string> brbSettings = null;
 	
@@ -123,11 +124,9 @@ public class CPHInline
 				break;
 			case EventType.Test:
 				PlayerLogger($"Resetting current list of played files and updating origin files");
-				CPH.TryGetArg("videoFolder",out string myDirectory);
-				CPH.TryGetArg("useSubdirectories",out bool useSubdir);
-				originFiles = new List<string>(Directory.GetFiles(myDirectory,"*.*", useSubdir ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
-				currentPlaylist = new List<string>(originFiles);
-				if(originFiles.Count <= 0) return false;
+				UpdatePlaylist();
+				ResetPlayer();
+				StartPlayer(_obsConnection);
 				break;
 		}
 		
@@ -137,21 +136,24 @@ public class CPHInline
 	public void StartPlayer(int obsConnection)
 	{	 		 
 		PlayerLogger("Starting player");
+		UpdatePlaylist();
 		continuePlayback = true;
 		CPH.ObsHideSource(mediaSceneName, mediaSourceName, obsConnection);
 
 		CPH.TryGetArg("videoFolder",out string myDirectory);
 		CPH.TryGetArg("useSubdirectories",out bool useSubdir);
+		CPH.TryGetArg("useReadLines",out bool useReadLines);
 		CPH.TryGetArg("playEachFileOnce",out bool playEachFileOnce);
-		CPH.TryGetArg("playRandom",out bool playRandom);
+		
 		CPH.TryGetArg("noDirectRepeat",out bool noDirectRepeat);
 		CPH.TryGetArg("delayBetweenMedia",out int mediaDelay);
 		CPH.TryGetArg("startDelayMs",out int startDelay);
+		
 		CPH.Wait(startDelay);
 		CPH.ObsShowSource(mediaSceneName, mediaSourceName, obsConnection);
 		
 		
-		originFiles = new List<string>(Directory.GetFiles(myDirectory,"*.*", useSubdir ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
+		//originFiles = new List<string>(Directory.GetFiles(myDirectory,"*.*", useSubdir ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
 		
 		if(originFiles.Count == 0 && continuePlayback)
 		{	 		
@@ -196,7 +198,8 @@ public class CPHInline
 					}
 				}
 			}else{
-				originFiles = SortPlaylist(originFiles);
+				
+				if(!useReadLines) originFiles = SortPlaylist(originFiles);
 				
 				int nextMediaIndex = 0;
 				
@@ -270,6 +273,57 @@ public class CPHInline
 		}
 	}
 	
+	public void UpdatePlaylist()
+	{
+		CPH.TryGetArg("useReadLines",out bool useReadLines);
+		CPH.TryGetArg("playRandom",out playRandom);
+		List<string> newFiles = new List<string>();
+		
+		if(useReadLines)
+		{
+			CPH.TryGetArg("fileFound",out bool fileFound);
+			CPH.TryGetArg("lineCount",out int lineCount);
+			if(fileFound && lineCount > 0)
+			{
+				for(int i=0;i<lineCount;i++)
+				{
+					if(CPH.TryGetArg("line"+i,out string line))
+					{
+						line = line.Trim('"');
+						try{
+							string fullPath = Path.GetFullPath(line);
+							newFiles.Add(fullPath);
+						}catch(Exception ex)
+						{
+							PlayerLogger($"FilePath \"{line}\" was not valid, will be skipped.",true);
+						}
+					}else{
+						break;
+					}
+				}
+			}
+		}else{
+			CPH.TryGetArg("videoFolder",out string myDirectory);
+			CPH.TryGetArg("useSubdirectories",out bool useSubdir);
+			try{
+				newFiles = new List<string>(Directory.GetFiles(myDirectory,"*.*", useSubdir ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly));
+			}catch (Exception ex)
+			{
+				PlayerLogger($"FolderPath \"{myDirectory}\" was not valid. \n {ex}",true);
+			}
+		}
+		
+		if(newFiles.Count > 0)
+		{
+			PlayerLogger($"Updating Origin Playlist. Count of files in playlist:{newFiles.Count}");
+			originFiles = newFiles;
+			if(playRandom)
+			{
+				currentPlaylist = originFiles;
+			}
+		}
+	}
+	
 	public List<string> SortPlaylist(List<string> playlist)
 	{
 		var sortedFiles = playlist
@@ -299,7 +353,7 @@ public class CPHInline
 		string logMessage = "[pwnBRB Player] - " + message;
 		if(playerLog && !error)
 		{
-			CPH.LogDebug(logMessage);
+			CPH.LogInfo(logMessage);
 		}else if (playerLog)
 		{
 			CPH.LogError(logMessage);
