@@ -274,35 +274,39 @@ public class CPHInline
 	}
 	
 	public void UpdatePlaylist()
-	{
+	{	 		 
 		CPH.TryGetArg("useReadLines",out bool useReadLines);
 		CPH.TryGetArg("playRandom",out playRandom);
 		List<string> newFiles = new List<string>();
 		
 		if(useReadLines)
-		{
+		{	 		
 			CPH.TryGetArg("fileFound",out bool fileFound);
 			CPH.TryGetArg("lineCount",out int lineCount);
 			if(fileFound && lineCount > 0)
-			{
+			{		 
 				for(int i=0;i<lineCount;i++)
-				{
+				{		 		
 					if(CPH.TryGetArg("line"+i,out string line))
-					{
-						line = line.Trim('"');
-						try{
-							string fullPath = Path.GetFullPath(line);
-							newFiles.Add(fullPath);
-						}catch(Exception ex)
-						{
-							PlayerLogger($"FilePath \"{line}\" was not valid, will be skipped.",true);
+					{		 		
+						if(!line.StartsWith("//"))
+						{	 		 
+							line = line.Trim('"');
+							try{	 		
+								string fullPath = Path.GetFullPath(line);
+								newFiles.Add(fullPath);
+							}catch(Exception ex)
+							{		 
+								PlayerLogger($"FilePath \"{line}\" was not valid, will be skipped.",true);
+							}
 						}
-					}else{
+
+					}else{		 		
 						break;
 					}
 				}
 			}
-		}else{
+		}else{		 		
 			CPH.TryGetArg("videoFolder",out string myDirectory);
 			CPH.TryGetArg("useSubdirectories",out bool useSubdir);
 			try{
