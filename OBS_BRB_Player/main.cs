@@ -56,7 +56,7 @@ public class CPHInline
 		CPH.TryGetArg("brbSceneName",out string brbName);
 		CPH.TryGetArg("usedObsName",out _obsName);
 		int obsConnection = CPH.ObsGetConnectionByName(_obsName);
-		
+		bool obsConnected = CPH.ObsIsConnected(obsConnection);
 		CPH.TryGetArg("obs.name",out string eventObsName);
 		CPH.TryGetArg("restartFromLastMedia",out restartFromLastMedia);
 		
@@ -99,7 +99,7 @@ public class CPHInline
 				}
 				break;
 			case EventType.ObsDisconnected:
-				if(isPlaying && _obsName == eventObsName)
+				if(isPlaying && obsConnected && _obsName == eventObsName)
 				{
 					PlayerLogger($"Resetting player - Reason: Obs Disconnected");
 					ResetPlayer();
@@ -107,7 +107,7 @@ public class CPHInline
 				break;
 			case EventType.ObsSceneChanged:
 				CPH.TryGetArg("obs.sceneName",out string changedScene);
-				if(_obsName == eventObsName)
+				if(obsConnected && _obsName == eventObsName)
 				{
 					if(isPlaying && changedScene != brbName)
 					{
@@ -125,7 +125,7 @@ public class CPHInline
 			case EventType.Test:
 				PlayerLogger($"Resetting current list of played files and updating origin files");
 				UpdatePlaylist();
-				if(_obsName == eventObsName)
+				if(obsConnected && _obsName == eventObsName)
 				{
 					ResetPlayer();
 					StartPlayer(_obsConnection);
