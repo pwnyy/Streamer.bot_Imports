@@ -125,8 +125,12 @@ public class CPHInline
 			case EventType.Test:
 				PlayerLogger($"Resetting current list of played files and updating origin files");
 				UpdatePlaylist();
-				ResetPlayer();
-				StartPlayer(_obsConnection);
+				if(_obsName == eventObsName)
+				{
+					ResetPlayer();
+					StartPlayer(_obsConnection);
+				}
+
 				break;
 		}
 		
