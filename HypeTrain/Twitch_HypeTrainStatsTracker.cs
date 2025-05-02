@@ -165,10 +165,16 @@ public class CPHInline
 					}
 					CPH.SetArgument("userDisplayList",displayNames);
 					CPH.SetArgument("userDisplayListString",String.Join(", ",displayNames));
+					CPH.SetArgument("userDisplayListObs",String.Join("\n",displayNames));
+					CPH.SetArgument("userDisplayListFile",String.Join(Environment.NewLine,displayNames));
 					CPH.SetArgument("userLoginList",loginNames);
 					CPH.SetArgument("userLoginListString",String.Join(", ",loginNames));
+					CPH.SetArgument("userLoginListObs",String.Join("\n",loginNames));
+					CPH.SetArgument("userLoginListFile",String.Join(Environment.NewLine,loginNames));
 					CPH.SetArgument("userIdList",userIds);
 					CPH.SetArgument("userIdListString",String.Join(", ",userIds));
+					CPH.SetArgument("userIdListObs",String.Join("\n",userIds));
+					CPH.SetArgument("userIdListFile",String.Join(Environment.NewLine,userIds));
 					_hypeTrainUsers.Clear();
 					_trainEvents = new List<HypeTrainEvent>();
 					break;
