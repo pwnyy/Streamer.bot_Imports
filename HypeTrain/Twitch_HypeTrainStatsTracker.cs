@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using Streamer.bot.Common.Events;
 public class CPHInline
-{
+{	 		 
 
 	static string _hypeTrainId = null;
 	static string _initUserId = null;
@@ -29,8 +29,7 @@ public class CPHInline
 	static List<HypeTrainEvent> _trainEvents = new List<HypeTrainEvent>();
 	
 	public bool Execute()
-	{
-
+	{	 		
 		_hypeTrainEnd = false;
 		DateTime currentEvent = DateTime.Now;
 		
@@ -38,153 +37,172 @@ public class CPHInline
 		CPH.TryGetArg("userName",out string userLogin);
 		CPH.TryGetArg("user",out string userDisplay);
 		User eventUser = new User()
-		{
+		{		 
 			userId = userId,
 			userLogin = userLogin,
 			userDisplay = userDisplay,
 		};
 		EventType eventType = CPH.GetEventType();
 		
-			switch(eventType)
-			{
-				//Subs/Resubs/GiftSubs/GiftBomb Part
-				case EventType.TwitchSub:
-				case EventType.TwitchReSub:
-					_trainEvents.Add( new HypeTrainEvent(){
-						eventTime = currentEvent,
-						type = eventType,
-						user = eventUser,
-						value = 1
-						});
-					if(!_hypeTrainUsers.ContainsKey(userId))
-					{
-						_hypeTrainUsers.Add(userId,eventUser);
-					}
-					break;
-				case EventType.TwitchGiftSub:
-					CPH.TryGetArg("fromGiftBomb",out bool fromGiftBomb);
-					if(fromGiftBomb) return false;
-					_trainEvents.Add( new HypeTrainEvent(){
-						eventTime = currentEvent,
-						type = eventType,
-						user = eventUser,
-						value = 1
-						});
-					if(!_hypeTrainUsers.ContainsKey(userId))
-					{
-						_hypeTrainUsers.Add(userId,eventUser);
-					}
-					break;
-				case EventType.TwitchGiftBomb:
-					CPH.TryGetArg("gifts",out int gifts);
-					_trainEvents.Add( new HypeTrainEvent(){
-						eventTime = currentEvent,
-						type = eventType,
-						user = eventUser,
-						value = gifts
+		switch(eventType)
+		{		 		
+			//Subs/Resubs/GiftSubs/GiftBomb Part
+			case EventType.TwitchSub:
+			case EventType.TwitchReSub:
+				_trainEvents.Add( new HypeTrainEvent(){
+					eventTime = currentEvent,
+					type = eventType,
+					user = eventUser,
+					value = 1
 					});
-					if(!_hypeTrainUsers.ContainsKey(userId))
-					{
-						_hypeTrainUsers.Add(userId,eventUser);
-					}
-					break;
-				//Bits Part
-				case EventType.TwitchAutomaticRewardRedemption:
-					CPH.TryGetArg("rewardType",out string rewardType);
-					if(rewardType == "celebration" || rewardType == "gigantify_an_emote" || rewardType == "message_effect")
-					{
-						
-						CPH.TryGetArg(rewardType+"_price",out long cost);
-						_trainEvents.Add( new HypeTrainEvent(){
-							eventTime = currentEvent,
-							type = eventType,
-							user = eventUser,
-							value = cost
-							});
-						if(!_hypeTrainUsers.ContainsKey(userId))
-						{
-							_hypeTrainUsers.Add(userId,eventUser);
-						}
-					}else{
-						return false;
-					}
-					break;
-				case EventType.TwitchCheer:
-					CPH.TryGetArg("bits",out long bits);
+				if(!_hypeTrainUsers.ContainsKey(userId))
+				{		 		
+					_hypeTrainUsers.Add(userId,eventUser);
+				}
+				break;
+			case EventType.TwitchGiftSub:
+				CPH.TryGetArg("fromGiftBomb",out bool fromGiftBomb);
+				if(fromGiftBomb) return false;
+				_trainEvents.Add( new HypeTrainEvent(){
+					eventTime = currentEvent,
+					type = eventType,
+					user = eventUser,
+					value = 1
+					});
+				if(!_hypeTrainUsers.ContainsKey(userId))
+				{	 		 
+					_hypeTrainUsers.Add(userId,eventUser);
+				}
+				break;
+			case EventType.TwitchGiftBomb:
+				CPH.TryGetArg("gifts",out int gifts);
+				_trainEvents.Add( new HypeTrainEvent(){
+					eventTime = currentEvent,
+					type = eventType,
+					user = eventUser,
+					value = gifts
+				});
+				if(!_hypeTrainUsers.ContainsKey(userId))
+				{	 		
+					_hypeTrainUsers.Add(userId,eventUser);
+				}
+				break;
+			//Bits Part
+			case EventType.TwitchAutomaticRewardRedemption:
+				CPH.TryGetArg("rewardType",out string rewardType);
+				if(rewardType == "celebration" || rewardType == "gigantify_an_emote" || rewardType == "message_effect")
+				{		 
+					
+					CPH.TryGetArg(rewardType+"_price",out long cost);
 					_trainEvents.Add( new HypeTrainEvent(){
 						eventTime = currentEvent,
 						type = eventType,
 						user = eventUser,
-						value = bits
+						value = cost
 						});
 					if(!_hypeTrainUsers.ContainsKey(userId))
-					{
+					{		 		
 						_hypeTrainUsers.Add(userId,eventUser);
 					}
-					break;
-				case EventType.TwitchHypeTrainStart:
-					_hypeTrainStart = DateTime.Now.AddSeconds(-601);
+				}else{
+					return false;
+				}
+				break;
+			case EventType.TwitchCheer:
+				CPH.TryGetArg("bits",out long bits);
+				_trainEvents.Add( new HypeTrainEvent(){
+					eventTime = currentEvent,
+					type = eventType,
+					user = eventUser,
+					value = bits
+					});
+				if(!_hypeTrainUsers.ContainsKey(userId))
+				{		 		
+					_hypeTrainUsers.Add(userId,eventUser);
+				}
+				break;
+			case EventType.TwitchHypeTrainStart:
+				_hypeTrainStart = DateTime.Now.AddSeconds(-601);
 
-					break;
-				case EventType.TwitchHypeTrainEnd:
-					CPH.SetGlobalVar("pwn_HypeTrainOnGoing", false, true);
-					_hypeTrainEnd = true;
-					long subCounter = 0;
-					long cheerCounter = 0;
-					
-					foreach(HypeTrainEvent evt in _trainEvents)
-					{
-						if(evt.eventTime >= _hypeTrainStart)
-						{
-							switch(evt.type)
-							{
-								case EventType.TwitchSub:
-								case EventType.TwitchReSub:
-								case EventType.TwitchGiftSub:
-								case EventType.TwitchGiftBomb:
-									subCounter += evt.value;
-									break;
-								case EventType.TwitchAutomaticRewardRedemption:
-								case EventType.TwitchCheer:
-									cheerCounter += evt.value;
-									break;
-							}
+				break;
+			case EventType.TwitchHypeTrainEnd:
+				CPH.SetGlobalVar("pwn_HypeTrainOnGoing", false, true);
+				_hypeTrainEnd = true;
+				long subCounter = 0;
+				long cheerCounter = 0;
+				
+				foreach(HypeTrainEvent evt in _trainEvents)
+				{	 		 
+					if(evt.eventTime >= _hypeTrainStart)
+					{	 		
+						switch(evt.type)
+						{		 
+							case EventType.TwitchSub:
+							case EventType.TwitchReSub:
+							case EventType.TwitchGiftSub:
+							case EventType.TwitchGiftBomb:
+								subCounter += evt.value;
+								if(evt.type == EventType.TwitchSub || evt.type == EventType.TwitchReSub)
+								{		 		
+									_hypeTrainUsers[evt.user.userId].stats["sub"] += evt.value;
+								}else{
+									_hypeTrainUsers[evt.user.userId].stats["giftSubs"] += evt.value;
+								}
+								break;
+							case EventType.TwitchAutomaticRewardRedemption:
+							case EventType.TwitchCheer:
+								cheerCounter += evt.value;
+								_hypeTrainUsers[evt.user.userId].stats["bits"] += evt.value;
+								break;
 						}
 					}
-					CPH.SetArgument("totalEventsCount",_trainEvents.Count);
-					CPH.SetArgument("totalSubs",subCounter);
-					CPH.SetArgument("totalBits",cheerCounter);
-					List<string> displayNames = new List<string>();
-					List<string> loginNames = new List<string>();
-					List<string> userIds = new List<string>();
-					foreach(KeyValuePair<string,User> htUser in _hypeTrainUsers)
-					{
-						userIds.Add(htUser.Key);
-						displayNames.Add(htUser.Value.userDisplay);
-						loginNames.Add(htUser.Value.userLogin);
+				}
+				
+				if(CPH.TryGetArg("top.subscription.userId",out string topSubsUserId))
+				{		 		
+					if(_hypeTrainUsers.ContainsKey(topSubsUserId))
+					{	 		 
+						CPH.SetArgument("top.subscription.sub", _hypeTrainUsers[topSubsUserId].stats["sub"]);
+						CPH.SetArgument("top.subscription.gifts", _hypeTrainUsers[topSubsUserId].stats["giftSubs"]);
 					}
-					CPH.SetArgument("userDisplayList",displayNames);
-					CPH.SetArgument("userDisplayListString",String.Join(", ",displayNames));
-					CPH.SetArgument("userDisplayListObs",String.Join("\n",displayNames));
-					CPH.SetArgument("userDisplayListFile",String.Join(Environment.NewLine,displayNames));
-					CPH.SetArgument("userLoginList",loginNames);
-					CPH.SetArgument("userLoginListString",String.Join(", ",loginNames));
-					CPH.SetArgument("userLoginListObs",String.Join("\n",loginNames));
-					CPH.SetArgument("userLoginListFile",String.Join(Environment.NewLine,loginNames));
-					CPH.SetArgument("userIdList",userIds);
-					CPH.SetArgument("userIdListString",String.Join(", ",userIds));
-					CPH.SetArgument("userIdListObs",String.Join("\n",userIds));
-					CPH.SetArgument("userIdListFile",String.Join(Environment.NewLine,userIds));
-					_hypeTrainUsers.Clear();
-					_trainEvents = new List<HypeTrainEvent>();
-					break;
-			}
-			CPH.SetArgument("hypeTrainEnd",_hypeTrainEnd);
+					
+				}
+				
+				CPH.SetArgument("totalEventsCount",_trainEvents.Count);
+				CPH.SetArgument("totalSubs",subCounter);
+				CPH.SetArgument("totalBits",cheerCounter);
+				List<string> displayNames = new List<string>();
+				List<string> loginNames = new List<string>();
+				List<string> userIds = new List<string>();
+				foreach(KeyValuePair<string,User> htUser in _hypeTrainUsers)
+				{	 		
+					userIds.Add(htUser.Key);
+					displayNames.Add(htUser.Value.userDisplay);
+					loginNames.Add(htUser.Value.userLogin);
+				}
+				CPH.SetArgument("userDisplayList",displayNames);
+				CPH.SetArgument("userDisplayListString",String.Join(", ",displayNames));
+				CPH.SetArgument("userDisplayListObs",String.Join("\n",displayNames));
+				CPH.SetArgument("userDisplayListFile",String.Join(Environment.NewLine,displayNames));
+				CPH.SetArgument("userLoginList",loginNames);
+				CPH.SetArgument("userLoginListString",String.Join(", ",loginNames));
+				CPH.SetArgument("userLoginListObs",String.Join("\n",loginNames));
+				CPH.SetArgument("userLoginListFile",String.Join(Environment.NewLine,loginNames));
+				CPH.SetArgument("userIdList",userIds);
+				CPH.SetArgument("userIdListString",String.Join(", ",userIds));
+				CPH.SetArgument("userIdListObs",String.Join("\n",userIds));
+				CPH.SetArgument("userIdListFile",String.Join(Environment.NewLine,userIds));
+				_hypeTrainUsers.Clear();
+				_trainEvents = new List<HypeTrainEvent>();
+				break;
+		}
+		CPH.SetArgument("hypeTrainEnd",_hypeTrainEnd);
 
 		return true;
 	}
 
-	public class HypeTrainEvent{
+	public class HypeTrainEvent
+	{		 
 		public DateTime eventTime {get;set;}
 		public EventType type {get;set;}
 		public User user {get;set;}
@@ -192,9 +210,15 @@ public class CPHInline
 	}
 	
 	public class User
-	{
+	{		 		
 		public string userId {get;set;}
 		public string userLogin {get;set;}
 		public string userDisplay {get;set;}
+		public Dictionary<string,long> stats {get;set;} = new Dictionary<string,long>()
+		{		 		
+			{"sub",0},
+			{"bits",0},
+			{"giftSubs",0}
+		};
 	}
 }
