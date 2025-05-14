@@ -29,8 +29,9 @@ ListFile is a new file line separated text to directly write to a file
 
 1.0.4:
 Added Arguments IF top.subscription.user is available.
-top.subscription.sub - amount of sub/resub the user did. Usually 0 or 1
-top.subscription.gifts - amount of subs the user gifted. Is not categorized in tiers.
+
+- top.subscription.sub - amount of sub/resub the user did. Usually 0 or 1
+- top.subscription.gifts - amount of subs the user gifted. Is not categorized in tiers.
 
 You will have to define your power-up prices yourself as well, as currently this information is also not provided by the Automatic Reward Redemption event.
 This may change in the future but that is the current standpoint for 0.2.6.
