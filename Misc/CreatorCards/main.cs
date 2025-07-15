@@ -105,21 +105,33 @@ public class CPHInline
 				
 			case EventType.WebsocketClientMessage:
 				CPH.TryGetArg("message",out string json);
-				PurchaseTriggerHandler(json);
+				MessageHandler(json);
 				break;
 		}
 		return true;
 	}
 	
-	private void PurchaseTriggerHandler(string json)
+	private void MessageHandler(string json)
+	{
+		JObject obj = JObject.Parse(json);
+		string messageType = obj["type"].ToString();
+		switch(messageType.ToLower())
+		{
+			case "purchase":
+				PurchaseHandler(obj,json);
+				break;
+			//more cases added potentially later on
+		}
+	}
+	
+	private void PurchaseHandler(JObject purchaseObj,string json)
 	{
 		Dictionary<string,object> purchaseArgs = new Dictionary<string,object>();
-		JObject obj = JObject.Parse(json);
 		purchaseArgs.Add("cc.json",json);
-		FlattenJToken(obj, "cc",purchaseArgs);
+		FlattenJToken(purchaseObj, "cc",purchaseArgs);
 		CPH.TriggerCodeEvent("pwn_CreatorCards_Purchase", purchaseArgs);
 		
-		SingleCardTrigger(purchaseArgs["cc.user"].ToString(),obj);
+		SingleCardTrigger(purchaseArgs["cc.user"].ToString(),purchaseObj);
 	}
 	
 	private void SingleCardTrigger(string user,JToken token)
