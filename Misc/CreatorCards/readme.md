@@ -1,5 +1,5 @@
 # Creator Cards Triggers
-After Importing the .sb file, from (here)[https://github.com/pwnyy/Streamer.bot_Imports/blob/main/Misc/CreatorCards/%5Bpwn%5D_CreatorCards_Triggers_by_pwnyy.sb] into Streamer.bot, go to https://creator.cards/dashboard/api and copy your API Token. Then in Streamer.bot go to Servers/Clients > Websocket Clients. There should be a custom websocket client with the name CreatorCards. Replace the "your-api-token-here" with your API token, then click "Ok". Then right-click the Client and click on Connect.
+After Importing the .sb file, from [here](https://github.com/pwnyy/Streamer.bot_Imports/blob/main/Misc/CreatorCards/%5Bpwn%5D_CreatorCards_Triggers_by_pwnyy.sb) into Streamer.bot, go to https://creator.cards/dashboard/api and copy your API Token. Then in Streamer.bot go to Servers/Clients > Websocket Clients. There should be a custom websocket client with the name CreatorCards. Replace the "your-api-token-here" with your API token, then click "Ok". Then right-click the Client and click on Connect.
 
 Once the status says "Open" the client should be connected.
 
