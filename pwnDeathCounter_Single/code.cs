@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using Newtonsoft.Json;
 using Streamer.bot.Common.Events;
+using System.Reflection;
 
 public class CPHInline
 {
@@ -41,7 +42,7 @@ public class CPHInline
 	/*
 		TOUCHY ZONE END HERE
 	*/
-	static readonly string  versionNum = "1.6.0";
+	static readonly string  versionNum = "1.6.1";
 	private static readonly HttpClient _client = new HttpClient{Timeout = TimeSpan.FromSeconds(30)};
 	private static readonly object _lock = new object();
 	static DeathCounter _dcInfo;
@@ -87,6 +88,49 @@ public class CPHInline
 				CPH.LogError($"[pwn DeathCounter Single][{versionNum}] - Was not able to register custom trigger {triggerName} with {attempts} attempts.");
 			}
 		}
+		
+		string triggerName_ChangeToDeath = "To Death Game";
+		string eventName_ChangeToDeath = "pwnDeathCounter_PG_Single_ChangeToDeathGame";
+		if(!CPH.RegisterCustomTrigger(triggerName_ChangeToDeath, eventName_ChangeToDeath, contextMenu))
+		{	 		
+			int attempts = 5;
+			bool success = false;
+			for(int i= 0;i<attempts;i++)
+			{		 
+				triggerName+= " ["+(i+1)+"]";
+				if(CPH.RegisterCustomTrigger(triggerName_ChangeToDeath, eventName_ChangeToDeath, contextMenu))
+				{
+					success = true;
+					break;
+				}
+			}
+			if(!success)
+			{		 		
+				CPH.LogError($"[pwn DeathCounter Single][{versionNum}] - Was not able to register custom trigger {triggerName} with {attempts} attempts.");
+			}
+		}
+		
+		string triggerName_ChangeToNonDeath = "To Non Death Game";
+		string eventName_ChangeToNonDeath = "pwnDeathCounter_PG_Single_ChangeToNonDeathGame";
+		if(!CPH.RegisterCustomTrigger(triggerName_ChangeToNonDeath, eventName_ChangeToNonDeath, contextMenu))
+		{	 		
+			int attempts = 5;
+			bool success = false;
+			for(int i= 0;i<attempts;i++)
+			{		 
+				triggerName+= " ["+(i+1)+"]";
+				if(CPH.RegisterCustomTrigger(triggerName_ChangeToDeath, eventName_ChangeToDeath, contextMenu))
+				{
+					success = true;
+					break;
+				}
+			}
+			if(!success)
+			{		 		
+				CPH.LogError($"[pwn DeathCounter Single][{versionNum}] - Was not able to register custom trigger {triggerName} with {attempts} attempts.");
+			}
+		}
+		
 		string json = CPH.GetGlobalVar<string?>(globalVariableName, true);
 		if (!string.IsNullOrEmpty(json) && json != "null")
 		{		 		
@@ -166,7 +210,14 @@ public class CPHInline
 			GetCurrentGame();
 		}		 		
 		
+		if(_dcDict.ContainsKey(gameId)){
+			TriggerOnGameChange("pwnDeathCounter_PG_Single_ChangeToDeathGame");
+		}else{
+			TriggerOnGameChange("pwnDeathCounter_PG_Single_ChangeToNonDeathGame");
+		}
+		
 		AddCurrentGameArgs();
+
 		return true;
 	}
 	
@@ -342,6 +393,7 @@ public class CPHInline
 			_dcDict.Add(_currentGame["gameId"],info);
 			SaveGameCounters();
 			TriggerOnChange(_pdcsMessageType);
+			TriggerOnGameChange("pwnDeathCounter_PG_Single_ChangeToDeathGame");
 		}
 		AddCurrentGameArgs();
 		_pdcsMessageTypeResult = messageTypeResult;
@@ -365,6 +417,7 @@ public class CPHInline
 			_dcDict.Remove(_currentGame["gameId"]);
 			SaveGameCounters();
 			TriggerOnChange(_pdcsMessageType);
+			TriggerOnGameChange("pwnDeathCounter_PG_Single_ChangeToNonDeathGame");
 		}		 
 		_pdcsMessageTypeResult = messageTypeResult;
 		CPH.SetArgument("pdcsMessageType",_pdcsMessageType);
@@ -594,7 +647,7 @@ public class CPHInline
 		}
 	}
 	
-	public void AddCurrentGameArgs()
+	public bool AddCurrentGameArgs()
 	{	 		 
 			string game 	= _currentGame["gameName"];
 			string gameId 	= _currentGame["gameId"];
@@ -626,6 +679,7 @@ public class CPHInline
 				CPH.SetArgument("pdcsCounter",gameCounter);
 				args["pdcsCounter"] = gameCounter;
 			}		 
+		return true;
 	}
 	
 	public void CheckNullGameCounters()
@@ -667,6 +721,25 @@ public class CPHInline
 		CPH.TriggerCodeEvent(eventName, triggerArgs);
 	}
 
+	public void TriggerOnGameChange(string eventName)
+	{	 		 
+		string gameId = _currentGame["gameId"];
+		Dictionary<string,object> triggerArgs = new Dictionary<string,object>();
+		triggerArgs["pdcsGameId"] = gameId;
+		triggerArgs["pdcsGame"] = _currentGame["gameName"];
+		triggerArgs["pdcsGameBoxArtUrl"] = String.IsNullOrEmpty(_currentGame["gameBoxArt"]) ? _blankGameBoxArt : _currentGame["gameBoxArt"].Replace("{width}x{height}",_artDimension);
+		triggerArgs["pdcsIgdbId"] = _currentGame["gameIgdbId"];
+		triggerArgs["pdcsTotalDeaths"] = _dcInfo.TotalDeaths;
+		triggerArgs["pdcsHasCounter"] = _dcDict.ContainsKey(gameId);
+
+		if(_dcDict.ContainsKey(gameId))
+		{	 		
+			triggerArgs["pdcsCounter"] = _dcDict[gameId].Count;
+		}		 
+		
+		CPH.TriggerCodeEvent(eventName, triggerArgs);
+	}
+	
 	public bool SendDeathCounterMessage()
 	{	 		 
 		CPH.TryGetArg("userType",out string platform);
@@ -832,7 +905,7 @@ public class CPHInline
 				CPH.TryGetArg("broadcast.id",out string broadcastId);
 				if(broadcastId != null)
 				{
-					CPH.SendYouTubeMessage(messageOutput,botSend,broadcastId);
+					CPH.SendYouTubeMessage(messageOutput,botSend, broadcastId: broadcastId);
 				}else{
 					CPH.SendYouTubeMessage(messageOutput,botSend);
 				}
@@ -922,7 +995,7 @@ public class CPHInline
 	
 	public class DeathCounter	 		 
 	{	 		
-		public Version Version {get;set;} = new Version("1.6.0");		 
+		public Version Version {get;set;} = new Version("1.6.1");		 
 		public long TotalDeaths{get;set;} = 0;		 		
 		public Dictionary<string,GameDeathInfo> Counters{get;set;} = new Dictionary<string,GameDeathInfo>();		 		
 		public bool InitFetchOldCounters = false;
