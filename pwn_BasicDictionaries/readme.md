@@ -1,6 +1,8 @@
 # pwn Basic Dictionaries
 
 ## Overview
+Download the .sb file and drag it into the import window of Streamer.bot, don't forget to also enable the commands after import.
+
 The extension manages multiple named dictionaries. Each dictionary stores string key/value pairs. Meaning you can for example add a word into a dictionary with the value of it being the meaning of the word, or anything else that you want to store. Key/Values in a dictionary are "Entries".
 
 All commands can be used by Twitch, YouTube, Trovo and Kick. By default they have only Twitch set as source. The responses will be send to the respective platform from where the command was used.
