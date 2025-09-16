@@ -7,6 +7,8 @@ All commands can be used by Twitch, YouTube, Trovo and Kick. By default they hav
 
 All commands, except for `Entry Get` and `Dictionary Get`, have their permissions set to Moderators by default.
 
+Initially a dictionary called `default` will be generated, so you don't have to first create a new one. You can rename it afterwards of course.
+
 Entry methods: `GetEntry`, `AddEntry`, `UpdateEntry`, `RemoveEntry`
 Dictionary methods: `GetDictionary`, `AddDictionary`, `RenameDictionary`, `RemoveDictionary`
 Custom triggers: `Entry Added/Updated/Removed`, `Dictionary Added/Renamed/Removed`
