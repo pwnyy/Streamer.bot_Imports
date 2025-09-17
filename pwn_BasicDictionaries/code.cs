@@ -58,7 +58,9 @@ public class CPHInline
 	const string methodResult = "extMethodResult";
 	const int MaxRetryAttempts = 5;
 	const int CommandDelayMs = 100;
-	const string SevenTvWhitespace = "󠀀";
+	public const string SevenTvWhitespace = "\u034F";
+	
+	//const string SevenTvWhitespace = "󠀀";
 
 	
 	static readonly Dictionary<string, int> PlatformMessageLimits = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
@@ -71,6 +73,7 @@ public class CPHInline
  
 	public void Init()
 	{		 		
+		ExtensionLog($"This extension was developed by pwnyy. Contact: contact@pwnyy.tv , Socials: https://pwnyy.tv");
 		ExtensionLog("Init Custom Triggers",1);
 		string[] contextMenu = {"[pwn] Extensions",customTriggerCategory};
 		
@@ -910,7 +913,7 @@ public class CPHInline
 			Dictionary<string, object> tempArg = new Dictionary<string, object>(args);
 			foreach (KeyValuePair<string, object> arg in tempArg)
 			{
-				if ((arg.Value is string) && arg.Value.ToString().IndexOf(SevenTvWhitespace) != -1)
+				if ((arg.Value is string) && arg.Value.ToString().Contains(SevenTvWhitespace))
 				{
 					string temp = arg.Value.ToString();
 					temp = temp.Replace(SevenTvWhitespace, "").Trim();
