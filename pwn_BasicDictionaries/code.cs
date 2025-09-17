@@ -58,7 +58,7 @@ public class CPHInline
 	const string methodResult = "extMethodResult";
 	const int MaxRetryAttempts = 5;
 	const int CommandDelayMs = 100;
-	public const string SevenTvWhitespace = "\u034F";
+	const string SevenTvWhitespace = "\u034F";
 	
 	//const string SevenTvWhitespace = "󠀀";
 
