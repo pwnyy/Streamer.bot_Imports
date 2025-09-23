@@ -1,5 +1,7 @@
 # Updating Content Classification Labels
 
+Download or copy the text in the .sb file and import it into Streamer.bot.
+
 1. **By Bitmask** 
 2. **By Singular Arguments**
 
