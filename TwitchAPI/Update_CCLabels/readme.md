@@ -110,4 +110,5 @@ If you don’t want to use bitmasking, so useBitmask = False, you can set each l
 | ccl_DrugsIntoxication |
 | ccl_SexualThemes |
 | ccl_ViolentGraphic |
+| ccl_Gambling |
 | ccl_ProfanityVulgarity |
