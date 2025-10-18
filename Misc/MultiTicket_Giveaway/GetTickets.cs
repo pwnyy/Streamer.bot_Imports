@@ -8,6 +8,7 @@ public class CPHInline
         CPH.TryGetArg("ticketCost", out long ticketCost);
         CPH.TryGetArg("maxUserTickets", out long maxTickets);
         CPH.TryGetArg("nonValidInputIsTicket", out bool nvIsTicket);
+        CPH.TryGetArg("useUserVariableAsCost",out bool useVar);
         CPH.TryGetArg("userVarUsed", out string varName);
         CPH.TryGetArg("user", out string user);
         CPH.TryGetArg("userId", out string userId);
@@ -19,12 +20,17 @@ public class CPHInline
 		if(platform.ToLower() != "twitch") return false;
 		
         // Get user's value
-        string valueString = CPH.GetTwitchUserVarById<string>(userId, varName, true) ?? "0";
-        if (!long.TryParse(valueString, out long userValue))
-        {		 
-            LogError($"Error in user variable for {user}({userId}): {varName}", valueString);
-            return true;
+        long userValue = 0;
+        if(useVar)
+        {
+            string valueString = CPH.GetTwitchUserVarById<string>(userId, varName, true) ?? "0";
+            if (!long.TryParse(valueString, out userValue))
+            {		 
+                LogError($"Error in user variable for {user}({userId}): {varName}", valueString);
+                return true;
+            }
         }
+
 
         // Get user's current ticket count
         string userTicketVar = $"pwnTwitchMultiTicketGiveaway_{id}";
@@ -58,7 +64,11 @@ public class CPHInline
             {	 		 
                 // Update user variables
                 CPH.SetTwitchUserVarById(userId, userTicketVar, newTicketAmount, true);
-                CPH.SetTwitchUserVarById(userId, varName, userValue - totalCost, true);
+                if(useVar)
+                {
+                    CPH.SetTwitchUserVarById(userId, varName, userValue - totalCost, true);
+                }
+                
                 SetResult(1, ticketAmount, totalCost, newTicketAmount, userValue);
             }
             else
