@@ -8,6 +8,13 @@ Extension includes "!color" command itself as quick example, can quickly be alte
 - !color rgb 123 123 1232
 - !color rgba 123 123 132 123
 - !color argb 123 123 123 123
+- !color 123 , will result in rgb with 123, 0 , 0
+- !color 50 123 70 42 , will result in argb 50, 123, 70, 42
+- !color #123 , will result in hex #112233
+- !color #123456, will result in hex #123456
+- !color #FFAABBCC , will result in hex of #AABBCC and FF determines the alpha value
+
+Color Aliases that are set will always take priority. They get searched for first.
 
 **Populated arguments:**
 - foundColor    - Is True/False
