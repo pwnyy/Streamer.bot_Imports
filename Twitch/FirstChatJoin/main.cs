@@ -1,3 +1,19 @@
+// Author: pwnyy , https://twitch.tv/pwnyytv , https://x.com/pwnyy, https://ko-fi.com/pwnyy, https://pwnyy.tv
+// Contact: contact@pwnyy.tv , or on the above mentioned social media.
+// Make sure to contact me if you are using my code somewhere, so I can see where it's being used!
+//
+// This program is licensed under the GNU General Public License Version 3 (GPLv3).
+// 
+// The GPLv3 is a free software license that ensures end users have the freedom to run,
+// study, share, and modify the software. Key provisions include:
+// 
+// - Copyleft: Modified versions of the software must also be licensed under the GPLv3.
+// - Source Code: You must provide access to the source code when distributing the software.
+// - Credit: You must credit the original author of the software, by mentioning either contact e-mail or their social media.
+// - No Warranty: The software is provided "as-is," without warranty of any kind.
+// 
+// For more details, see https://www.gnu.org/licenses/gpl-3.0.en.html
+
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -5,64 +21,96 @@ using Streamer.bot.Common.Events;
 
 public class CPHInline
 {
-	public Dictionary<string,HashSet<string>> groupUsers;
-	public string codeEvent = "pwnMisc_PV_First_Chat_Join";
-	public string logTitle = "[pwn Misc][First Chat Join] -";
+	public HashSet<string> groupUsers = new();
+	public HashSet<string> seenUsers = new();
+
+	//default value of userVarName = "pwn_FirstChatJoin_state"
+	static string globalVarName = "pwn_FirstChatJoin_state";
+	//default value of triggerIdentifier = "" , this should only be changed IF you duplicate the code to use it for something else and also create different triggers for that
+	static string triggerIdentifier = "";
+
+	//
+	/*  DISCLAIMER
+		End of being able to edit and I still give support, anything below being changed by others, no support guaranteed.
+		
+	*/
+
+	const string currentCodeVersion = "1.0.0";
+
+	static string customTriggerCategory = string.IsNullOrWhiteSpace(triggerIdentifier)
+    	? "First Chat Join"
+    	: $"First Chat Join {triggerIdentifier}";
+
+	static string triggerPrefix = "pwn_FirstChatJoin"+triggerIdentifier;
+
+	Dictionary<string,string> triggerContext = new Dictionary<string,string>()
+	{		 
+		{triggerPrefix+"_UserJoinedChat","User Joined"},
+	};
+
+	int MaxRetryAttempts = 5;
+	
 	public void Init()
-	{
-		string triggerName = "First Chat Join";
-		string[] contextMenu = {"[pwn] Misc","Present Viewers"};
-		if(!CPH.RegisterCustomTrigger(triggerName, codeEvent, contextMenu))
+	{	 		 
+		ExtensionLog($"This extension was developed by pwnyy. Contact: contact@pwnyy.tv , Socials: https://pwnyy.tv");
+		ExtensionLog("Init Custom Triggers",1);
+		string[] contextMenu = {"[pwn] Extensions",customTriggerCategory};
+		HydrateSeenUsers();
+		foreach(KeyValuePair<string,string> kvp in triggerContext)
 		{
-			int attempts = 5;
-			bool success = false;
-			for(int i= 0;i<attempts;i++)
-			{
-				triggerName+= " ["+(i+1)+"]";
-				if(CPH.RegisterCustomTrigger(triggerName, codeEvent, contextMenu))
-				{
-					success = true;
-					break;
+			string triggerName = kvp.Value;
+			string eventName = kvp.Key;
+			if(!CPH.RegisterCustomTrigger(triggerName, eventName, contextMenu))
+			{	 		
+				bool success = false;
+				for(int i = 0; i < MaxRetryAttempts; i++)
+				{		 
+					triggerName += " [" + (i + 1) + "]";
+					if(CPH.RegisterCustomTrigger(triggerName, eventName, contextMenu))
+					{
+						success = true;
+						break;
+					}
 				}
-			}
-			if(!success)
-			{
-				CPH.LogError($"{logTitle} Was not able to register custom trigger {triggerName}.");
+				if(!success)
+				{		 		
+					ExtensionLog($"Was not able to register custom trigger {triggerName} with {MaxRetryAttempts} attempts.", -1);
+				}
 			}
 		}
 	}
-	
+
 	public bool Execute()
 	{
-		
+		string triggerEvent = "UserJoinedChat";
 		EventType eventy = CPH.GetEventType();
-		if(eventy == EventType.TwitchPresentViewers)
+		EventSource source = CPH.GetSource();
+		if(source == EventSource.Twitch && eventy == EventType.TwitchPresentViewers)
 		{
 			GetGroupUsers();
 			CPH.TryGetArg("users",out List<Dictionary<string,object>> users);
-			EventSource source = CPH.GetSource();
-			string platform = source.ToString().ToLower();
+			
+			if (groupUsers.IsSubsetOf(seenUsers))  return true;
+			int targetCount = groupUsers.Count;
 			foreach(Dictionary<string,object> userInfo in users)
 			{
+				if (seenUsers.Count >= targetCount) break;
+
 				string userId = userInfo["id"].ToString();
-				if(groupUsers[platform].Contains(userId))
+				if(!seenUsers.Contains(userId) && groupUsers.Contains(userId))
 				{
-					bool firstJoin = GetUserVar(platform,userId);
-					if(!firstJoin)
+					Dictionary<string,object> userArgs = new Dictionary<string,object>()
 					{
-						Dictionary<string,object> userDict = new Dictionary<string,object>()
-						{
-							{"userId",userId},
-							{"user",userInfo["display"]},
-							{"userName",userInfo["userName"]},
-							{"userType",platform},
-							{"isSubscribed",userInfo["isSubscribed"]},
-							{"isVip",userInfo["role"].ToString() == "2"},
-							{"isModerator",userInfo["role"].ToString() == "3"}
-						};
-						SetUserVar(userId);
-						CPH.TriggerCodeEvent(codeEvent,userDict);
-					}
+						{"userId",userId},
+						{"user",userInfo["display"]},
+						{"userName",userInfo["userName"]},
+						{"userType","twitch"},
+						{"isSubscribed",userInfo["isSubscribed"]},
+						{"isVip",userInfo["role"].ToString() == "2"},
+						{"isModerator",userInfo["role"].ToString() == "3"}
+					};
+					SetSeenUser(userId);
+					TriggerOn($"{triggerPrefix}_{triggerEvent}", userArgs);
 				}
 			}
 		}
@@ -72,51 +120,69 @@ public class CPHInline
 	
 	public bool ResetFirstJoin()
 	{
-		CPH.UnsetAllUsersVar(codeEvent, true);
-		CPH.LogInfo($"{logTitle} Resetting First Join Users reset for all platforms.");
+		CPH.UnsetAllUsersVar(globalVarName, true);
+		seenUsers.Clear();
+		ExtensionLog($"Resetting First Join Users reset for all platforms.");
 		return true;
 	}
 	
-	public bool GetUserVar(string platform, string userId)
+	public void HydrateSeenUsers()
 	{
-		bool output = false;
-		switch(platform)
+		List<UserVariableValue<bool>> users = CPH.GetTwitchUsersVar<bool>(globalVarName, true);
+		foreach( var user in users)
 		{
-			case "twitch":
-				output = CPH.GetTwitchUserVarById<bool?>(userId, codeEvent, true) ?? false;
-				break;
+			if(user.Value) seenUsers.Add(user.UserId);
 		}
-		return output;
 	}
 	
-	public void SetUserVar(string userId)
+	public void SetSeenUser(string userId)
 	{
-		CPH.SetTwitchUserVarById(userId, codeEvent, true, true);
+		CPH.SetTwitchUserVarById(userId, globalVarName, true, true);
+		seenUsers.Add(userId);
 	}
 	
 	public void GetGroupUsers()
-    {
-    	Dictionary<string,HashSet<string>> groupOut = new Dictionary<string,HashSet<string>>()
-    	{	 		 
-			{"twitch",new HashSet<string>()}
-    	};	 		
-
+    {	
 		CPH.TryGetArg("groups",out string groups);
 		List<string> groupList = groups.Split(',').Select(group => group.Trim()).ToList();
 		foreach(string groupName in groupList)
 		{
-			List<GroupUser> groupUsers = CPH.UsersInGroup(groupName);
-			foreach(GroupUser user in groupUsers)
+			List<GroupUser> groupUserList = CPH.UsersInGroup(groupName);
+			foreach(GroupUser user in groupUserList)
 			{
-				string type = user.Type.ToLower();
-				if(!groupOut.ContainsKey(type))
-				{
-					groupOut.Add(type,new HashSet<string>());
-				}
-				groupOut[type].Add(user.Id);
+				groupUsers.Add(user.Id);
 			}
 		}
-    	
-		groupUsers = groupOut;
     }
+
+	public void TriggerOn(string eventName, Dictionary<string,object> triggerArgs)
+	{	 		 
+		triggerArgs["pwnExtensionTriggerEvent"] = eventName;
+		CPH.TriggerCodeEvent(eventName, triggerArgs);
+	}
+
+	public void ExtensionLog(string message, int logType = 0)
+	{		 		
+		string name = customTriggerCategory;
+		string output = $"[{name}] - {message}";
+
+		switch(logType)
+		{
+			case -2:
+				CPH.LogError(output);
+				break;
+			case -1:
+				CPH.LogWarn(output);
+				break;
+			case 1:
+				CPH.LogDebug(output);
+				break;
+			case 2:
+				CPH.LogVerbose(output);
+				break;
+			default:
+				CPH.LogInfo(output);
+				break;
+		}
+	}
 }
