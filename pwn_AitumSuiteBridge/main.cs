@@ -44,7 +44,7 @@ public class CPHInline
 	static readonly string customTriggerCategory ="Aitum Suite Bridge";
 	static readonly string vendorName = "aitum-stream-suite";
 	static readonly string methodResult = "extMethodResult";
-	static int _obsIndex = 2;
+	static int _obsIndex = -1;
 
 	static ExtensionData _extData = new ExtensionData();
 
