@@ -1,9 +1,14 @@
 # pwn Aitum Suite Bridge
 
+> **Disclaimer:** This is a third-party integration developed by **pwnyy**. 
+> It is **not** an official product of, nor is it endorsed or supported by, Aitum or the Aitum team.
+
 ## Overview
 Download the .sb file and drag it into the import window of Streamer.bot, don't forget to also enable the commands after import.
 
 The extension tries to make it easier for users to handle Sources, Scenes, Filters and other features of the Aitum Stream Suite, a plugin for OBS, via Streamer.bot actions.
+
+
 
 Included Actions:
 - Backtrack Save
