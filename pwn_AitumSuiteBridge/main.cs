@@ -44,7 +44,7 @@ public class CPHInline
 	static readonly string customTriggerCategory ="Aitum Suite Bridge";
 	static readonly string vendorName = "aitum-stream-suite";
 	static readonly string methodResult = "extMethodResult";
-	static int _obsIndex = -1;
+	static int _obsIndex = 0;
 
 	static ExtensionData _extData = new ExtensionData();
 
@@ -1258,7 +1258,7 @@ public class CPHInline
 		obsIndex = _obsIndex;
 		if(CPH.TryGetArg("obsConnectionIndex", out int inputIndex))
 		{
-			if(inputIndex >= -1)
+			if(inputIndex >= 0)
 			{
 				obsIndex = inputIndex; 
 			}

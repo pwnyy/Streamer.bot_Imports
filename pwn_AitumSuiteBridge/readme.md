@@ -54,9 +54,9 @@ Possible Results:
 
 
 ## More Information about actions:
-All methods accept an additional argument called `obsConnectionIndex`, with this you can decide to which connected OBS you will send the requests to. In most cases you can just not add this argument, as by default it will use the OBS connection which is set as default, which would be the index value `-1`.
+⚠️ All methods accept an additional argument called `obsConnectionIndex`, with this you can decide to which connected OBS you will send the requests to. In most cases you can just not add this argument, as by default it will use the first OBS connection which would be is the index 0.
 
-You can look up your OBS connection indexes in Streamer.bot by going to Stream Apps > OBS Studio, and the very first column is the index of the connection. You can also set your default OBS here, by right-clicking a connection and setting it as default.
+You can look up your OBS connection indexes in Streamer.bot by going to Stream Apps > OBS Studio, and the very first column is the index of the connection.
 
 Every Argumentnames with `#` in their name, indicate an index. Meaning `#` will be replaced with a number starting from 0.
 
