@@ -40,7 +40,7 @@ public enum MethodResult
 public class CPHInline
 {	 		
 
-	static readonly string currentCodeVersion = "1.0.0";
+	static readonly string currentCodeVersion = "1.0.1";
 	static readonly string customTriggerCategory ="Aitum Suite Bridge";
 	static readonly string vendorName = "aitum-stream-suite";
 	static readonly string methodResult = "extMethodResult";
