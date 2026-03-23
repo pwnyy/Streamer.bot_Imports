@@ -539,7 +539,7 @@ public class CPHInline
 					);
 					
 					JObject response = SendRawRequest("SetSceneItemEnabled", rawRequest, path.ObsIndex);
-					CPH.SendMessage(response.ToString());
+					
 					bool requestSuccess = response.HasValues;
 					
 					if(!requestSuccess)
